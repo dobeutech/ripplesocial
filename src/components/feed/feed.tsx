@@ -3,6 +3,7 @@ import { PostCard } from '../posts/post-card';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/auth-context';
 import type { Database } from '../../lib/database.types';
+import { FEED_LIMITS } from '../../config/constants';
 
 type Post = Database['public']['Tables']['posts']['Row'];
 
@@ -46,14 +47,14 @@ export function Feed({ mode }: FeedProps) {
         query = query
           .eq('privacy_level', 'public')
           .order('engagement_score', { ascending: false })
-          .limit(20);
+          .limit(FEED_LIMITS.TOP_STORIES);
       }
 
       if (mode !== 'top') {
         query = query.order('created_at', { ascending: false });
       }
 
-      query = query.limit(50);
+      query = query.limit(FEED_LIMITS.DEFAULT);
 
       const { data: postsData, error: postsError } = await query;
 

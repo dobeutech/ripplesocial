@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AuthProvider, useAuth } from './contexts/auth-context';
 import { Header } from './components/layout/header';
 import { Feed } from './components/feed/feed';
 import { CreatePostModal } from './components/posts/create-post-modal';
 import { NotificationPanel } from './components/notifications/notification-panel';
 import { supabase } from './lib/supabase';
+import { POLLING_INTERVALS } from './config/constants';
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -14,25 +15,30 @@ function AppContent() {
   const [feedMode, setFeedMode] = useState<'public' | 'tagged' | 'top'>('public');
   const [refreshKey, setRefreshKey] = useState(0);
 
-  useEffect(() => {
-    if (user) {
-      loadUnreadCount();
-      const interval = setInterval(loadUnreadCount, 30000);
-      return () => clearInterval(interval);
+  const loadUnreadCount = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      const { count, error } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('read', false);
+
+      if (error) throw error;
+      setUnreadCount(count || 0);
+    } catch (err) {
+      console.error('Failed to load notification count:', err);
     }
   }, [user]);
 
-  const loadUnreadCount = async () => {
-    if (!user) return;
-
-    const { count } = await supabase
-      .from('notifications')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('read', false);
-
-    setUnreadCount(count || 0);
-  };
+  useEffect(() => {
+    if (user) {
+      loadUnreadCount();
+      const interval = setInterval(loadUnreadCount, POLLING_INTERVALS.NOTIFICATIONS);
+      return () => clearInterval(interval);
+    }
+  }, [user, loadUnreadCount]);
 
   const handlePostCreated = () => {
     setRefreshKey(prev => prev + 1);

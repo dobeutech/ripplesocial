@@ -97,10 +97,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkForPendingMatches = async (email: string, name: string, userId: string) => {
     try {
+      // Sanitize input to prevent SQL injection by escaping special ILIKE characters
+      const sanitizedName = name.replace(/[%_]/g, '\\$&');
+
       const { data: matches } = await supabase
         .from('pending_recipient_matches')
         .select('*')
-        .or(`recipient_email.eq.${email},recipient_name.ilike.%${name}%`)
+        .or(`recipient_email.eq.${email},recipient_name.ilike.%${sanitizedName}%`)
         .eq('matched', false);
 
       if (matches && matches.length > 0) {

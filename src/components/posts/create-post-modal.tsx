@@ -6,6 +6,7 @@ import { Button } from '../ui/button';
 import { useAuth } from '../../contexts/auth-context';
 import { supabase } from '../../lib/supabase';
 import type { Database } from '../../lib/database.types';
+import { SEARCH_CONFIG } from '../../config/constants';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
@@ -28,7 +29,7 @@ export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostMo
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (recipientSearch.length >= 2) {
+    if (recipientSearch.length >= SEARCH_CONFIG.MIN_CHARACTERS) {
       searchUsers();
     } else {
       setSearchResults([]);
@@ -37,11 +38,14 @@ export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostMo
 
   const searchUsers = async () => {
     try {
+      // Sanitize input to prevent SQL injection by escaping special ILIKE characters
+      const sanitized = recipientSearch.replace(/[%_]/g, '\\$&');
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .or(`first_name.ilike.%${recipientSearch}%,last_name.ilike.%${recipientSearch}%,display_name.ilike.%${recipientSearch}%`)
-        .limit(5);
+        .or(`first_name.ilike.%${sanitized}%,last_name.ilike.%${sanitized}%,display_name.ilike.%${sanitized}%`)
+        .limit(SEARCH_CONFIG.MAX_RESULTS);
 
       if (error) throw error;
       setSearchResults(data || []);
@@ -142,7 +146,7 @@ export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostMo
             <div className="flex items-center justify-between p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 rounded-full bg-emerald-200 flex items-center justify-center text-emerald-700 font-medium">
-                  {selectedRecipient.first_name[0]}
+                  {selectedRecipient.first_name?.[0] || '?'}
                 </div>
                 <span className="font-medium text-slate-900">{recipientName}</span>
               </div>
@@ -163,10 +167,15 @@ export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostMo
                 placeholder="Search for a user or enter a name"
                 value={recipientSearch || recipientName}
                 onChange={(e) => {
+                  const value = e.target.value;
                   if (selectedRecipient) {
-                    setRecipientName(e.target.value);
+                    // Clear selection when user starts typing a custom name
+                    setSelectedRecipient(null);
+                    setRecipientName(value);
+                    setRecipientSearch('');
                   } else {
-                    setRecipientSearch(e.target.value);
+                    setRecipientSearch(value);
+                    setRecipientName('');
                   }
                 }}
               />
@@ -180,7 +189,7 @@ export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostMo
                       className="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center space-x-2"
                     >
                       <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-medium">
-                        {result.first_name[0]}
+                        {result.first_name?.[0] || '?'}
                       </div>
                       <div>
                         <p className="font-medium text-slate-900">
