@@ -89,7 +89,7 @@ export function PostCard({ post, onLikeToggle }: PostCardProps) {
             <div className="flex items-center space-x-2">
               <span className="font-semibold text-slate-900">{getAuthorDisplay()}</span>
               <span className="text-slate-400">→</span>
-              <span className="font-medium text-emerald-600">{post.recipient_name}</span>
+              <span className="font-medium text-emerald-600">{post.recipient_name || 'Someone'}</span>
             </div>
             <p className="text-xs text-slate-500">{formatTimeAgo(post.created_at)}</p>
           </div>

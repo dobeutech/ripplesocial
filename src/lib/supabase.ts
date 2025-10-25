@@ -8,6 +8,14 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
+if (!supabaseUrl.startsWith('https://')) {
+  throw new Error('Invalid Supabase URL format - must start with https://');
+}
+
+if (supabaseAnonKey.length < 20) {
+  throw new Error('Invalid Supabase anon key format - key too short');
+}
+
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
