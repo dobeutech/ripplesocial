@@ -10,6 +10,7 @@ Complete guide to Ripple project documentation.
 |----------|---------|----------|
 | [README.md](./README.md) | Project overview and quick start | Everyone |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | System architecture diagrams | Everyone |
+| [ENVIRONMENT.md](./ENVIRONMENT.md) | Development environment setup | Developers |
 | [AGENTS.md](./AGENTS.md) | Ona Agent development guide | Developers |
 | [RUNBOOK.md](./RUNBOOK.md) | Operational procedures | On-call engineers |
 | [CLI_WORKFLOWS.md](./CLI_WORKFLOWS.md) | Command-line workflows | Developers |
@@ -18,6 +19,8 @@ Complete guide to Ripple project documentation.
 | [PRODUCTION_PLAN.md](./PRODUCTION_PLAN.md) | Production readiness | Engineering leads |
 | [CODE_REVIEW.md](./CODE_REVIEW.md) | Code review findings | Developers |
 | [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) | Implementation notes | Developers |
+| [OUTSTANDING_ITEMS.md](./OUTSTANDING_ITEMS.md) | Production checklist | Engineering leads |
+| [PROJECT_STATUS.md](./PROJECT_STATUS.md) | Complete project status | Everyone |
 
 ---
 

@@ -103,13 +103,16 @@ ripple/
 ## Documentation
 
 - **[DOCUMENTATION_INDEX.md](./DOCUMENTATION_INDEX.md)** - Complete documentation guide
+- **[PROJECT_STATUS.md](./PROJECT_STATUS.md)** - Complete project status and roadmap
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System architecture and diagrams
+- **[ENVIRONMENT.md](./ENVIRONMENT.md)** - Development environment setup
 - **[AGENTS.md](./AGENTS.md)** - Guide for working with Ona Agent
 - **[RUNBOOK.md](./RUNBOOK.md)** - Operational runbook for on-call engineers
 - **[CLI_WORKFLOWS.md](./CLI_WORKFLOWS.md)** - Common CLI workflows
 - **[AUTOMATION_PLAN.md](./AUTOMATION_PLAN.md)** - CI/CD and automation roadmap
 - **[COST_REVIEW.md](./COST_REVIEW.md)** - Cost analysis and optimization
 - **[PRODUCTION_PLAN.md](./PRODUCTION_PLAN.md)** - Production readiness plan
+- **[OUTSTANDING_ITEMS.md](./OUTSTANDING_ITEMS.md)** - Production checklist
 - **[CODE_REVIEW.md](./CODE_REVIEW.md)** - Code review findings
 - **[IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md)** - Implementation notes
 
