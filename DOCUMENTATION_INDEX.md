@@ -9,6 +9,7 @@ Complete guide to Ripple project documentation.
 | Document | Purpose | Audience |
 |----------|---------|----------|
 | [README.md](./README.md) | Project overview and quick start | Everyone |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | System architecture diagrams | Everyone |
 | [AGENTS.md](./AGENTS.md) | Ona Agent development guide | Developers |
 | [RUNBOOK.md](./RUNBOOK.md) | Operational procedures | On-call engineers |
 | [CLI_WORKFLOWS.md](./CLI_WORKFLOWS.md) | Command-line workflows | Developers |

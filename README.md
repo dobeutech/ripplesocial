@@ -102,6 +102,8 @@ ripple/
 
 ## Documentation
 
+- **[DOCUMENTATION_INDEX.md](./DOCUMENTATION_INDEX.md)** - Complete documentation guide
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System architecture and diagrams
 - **[AGENTS.md](./AGENTS.md)** - Guide for working with Ona Agent
 - **[RUNBOOK.md](./RUNBOOK.md)** - Operational runbook for on-call engineers
 - **[CLI_WORKFLOWS.md](./CLI_WORKFLOWS.md)** - Common CLI workflows
