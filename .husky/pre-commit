@@ -1,0 +1,32 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit checks..."
+
+# Type check
+echo "📝 Type checking..."
+npm run typecheck || {
+  echo "❌ Type check failed. Fix errors before committing."
+  exit 1
+}
+
+# Lint
+echo "🔧 Linting..."
+npm run lint || {
+  echo "❌ Lint check failed. Fix errors before committing."
+  exit 1
+}
+
+# Check for console.log statements (warning only)
+echo "🔎 Checking for console statements..."
+if git diff --cached --name-only | grep -E '\.(ts|tsx)$' | xargs grep -n "console\\.log" 2>/dev/null; then
+  echo "⚠️  Warning: console.log statements found. Consider removing them."
+fi
+
+# Check for TODO/FIXME comments in staged files
+echo "📋 Checking for TODO/FIXME comments..."
+if git diff --cached --name-only | grep -E '\.(ts|tsx)$' | xargs grep -n "TODO\|FIXME" 2>/dev/null; then
+  echo "⚠️  Warning: TODO/FIXME comments found in staged files."
+fi
+
+echo "✅ Pre-commit checks passed!"
