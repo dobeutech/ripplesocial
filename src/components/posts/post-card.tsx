@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Heart, MessageCircle, User } from 'lucide-react';
+import { Heart, MessageCircle, User, Bookmark } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
-import { Button } from '../ui/button';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/auth-context';
 import type { Database } from '../../lib/database.types';
@@ -13,18 +12,21 @@ interface PostWithAuthor extends Post {
     id: string;
     display_name: string | null;
     avatar_url: string | null;
-  };
+  } | null;
   is_liked?: boolean;
+  is_bookmarked?: boolean;
 }
 
 interface PostCardProps {
   post: PostWithAuthor;
   onLikeToggle: () => void;
+  onBookmarkToggle?: () => void;
 }
 
-export function PostCard({ post, onLikeToggle }: PostCardProps) {
+export function PostCard({ post, onLikeToggle, onBookmarkToggle }: PostCardProps) {
   const { user } = useAuth();
   const [isLiking, setIsLiking] = useState(false);
+  const [isBookmarking, setIsBookmarking] = useState(false);
   const [showComments, setShowComments] = useState(false);
 
   const handleLikeToggle = async () => {
@@ -48,6 +50,30 @@ export function PostCard({ post, onLikeToggle }: PostCardProps) {
       console.error('Error toggling like:', error);
     } finally {
       setIsLiking(false);
+    }
+  };
+
+  const handleBookmarkToggle = async () => {
+    if (!user || isBookmarking) return;
+
+    setIsBookmarking(true);
+    try {
+      if (post.is_bookmarked) {
+        await supabase
+          .from('bookmarks')
+          .delete()
+          .eq('post_id', post.id)
+          .eq('user_id', user.id);
+      } else {
+        await supabase
+          .from('bookmarks')
+          .insert({ post_id: post.id, user_id: user.id });
+      }
+      onBookmarkToggle?.();
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+    } finally {
+      setIsBookmarking(false);
     }
   };
 
@@ -121,6 +147,23 @@ export function PostCard({ post, onLikeToggle }: PostCardProps) {
           >
             <MessageCircle size={20} />
             <span className="text-sm font-medium">{post.comment_count}</span>
+          </button>
+
+          <button
+            onClick={handleBookmarkToggle}
+            disabled={!user || isBookmarking}
+            className={`flex items-center space-x-2 transition-colors ml-auto ${
+              post.is_bookmarked
+                ? 'text-amber-500'
+                : 'text-slate-500 hover:text-amber-500'
+            } disabled:opacity-50`}
+            aria-label={post.is_bookmarked ? 'Remove bookmark' : 'Bookmark post'}
+          >
+            <Bookmark
+              size={20}
+              fill={post.is_bookmarked ? 'currentColor' : 'none'}
+              className="transition-all"
+            />
           </button>
         </div>
 

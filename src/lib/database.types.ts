@@ -17,6 +17,27 @@ export type NotificationType = 'tagged' | 'like' | 'comment' | 'match_found' | '
 export interface Database {
   public: {
     Tables: {
+      bookmarks: {
+        Row: {
+          id: string;
+          user_id: string;
+          post_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          post_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          post_id?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           id: string;
@@ -66,6 +87,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       posts: {
         Row: {
@@ -122,6 +144,15 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: "posts_author_id_fkey";
+            columns: ["author_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       post_likes: {
         Row: {
@@ -142,6 +173,7 @@ export interface Database {
           user_id?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
       comments: {
         Row: {
@@ -171,6 +203,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       notifications: {
         Row: {
@@ -203,6 +236,7 @@ export interface Database {
           read?: boolean;
           created_at?: string;
         };
+        Relationships: [];
       };
       pending_recipient_matches: {
         Row: {
@@ -232,6 +266,7 @@ export interface Database {
           matched_user_id?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
       verification_requests: {
         Row: {
@@ -264,6 +299,7 @@ export interface Database {
           reviewed_at?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
       user_blocks: {
         Row: {
@@ -284,7 +320,26 @@ export interface Database {
           blocked_id?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      [_ in never]: never;
+    };
+    Enums: {
+      document_type: DocumentType;
+      notification_type: NotificationType;
+      poster_anonymity: PosterAnonymity;
+      privacy_level: PrivacyLevel;
+      recipient_type: RecipientType;
+      verification_request_status: VerificationRequestStatus;
+      verification_status: VerificationStatus;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
     };
   };
 }
