@@ -12,12 +12,13 @@ interface PostWithAuthor extends Post {
     id: string;
     display_name: string | null;
     avatar_url: string | null;
-  };
+  } | null;
   is_liked?: boolean;
+  is_bookmarked?: boolean;
 }
 
 interface FeedProps {
-  mode: 'public' | 'tagged' | 'top';
+  mode: 'public' | 'tagged' | 'top' | 'saved';
 }
 
 export function Feed({ mode }: FeedProps) {
@@ -32,50 +33,95 @@ export function Feed({ mode }: FeedProps) {
   const loadPosts = async () => {
     setLoading(true);
     try {
-      let query = supabase
-        .from('posts')
-        .select(`
-          *,
-          author:profiles!posts_author_id_fkey(id, display_name, avatar_url)
-        `);
+      let postsData: PostWithAuthor[] | null = null;
 
-      if (mode === 'public') {
-        query = query.eq('privacy_level', 'public');
-      } else if (mode === 'tagged' && user) {
-        query = query.eq('recipient_id', user.id);
-      } else if (mode === 'top') {
-        query = query
-          .eq('privacy_level', 'public')
-          .order('engagement_score', { ascending: false })
-          .limit(FEED_LIMITS.TOP_STORIES);
-      }
-
-      if (mode !== 'top') {
-        query = query.order('created_at', { ascending: false });
-      }
-
-      query = query.limit(FEED_LIMITS.DEFAULT);
-
-      const { data: postsData, error: postsError } = await query;
-
-      if (postsError) throw postsError;
-
-      if (user && postsData) {
-        const postIds = postsData.map(p => p.id);
-        const { data: likes } = await supabase
-          .from('post_likes')
+      if (mode === 'saved' && user) {
+        // For saved mode, fetch bookmarks first, then get the posts
+        const { data: bookmarksData, error: bookmarksError } = await supabase
+          .from('bookmarks')
           .select('post_id')
           .eq('user_id', user.id)
-          .in('post_id', postIds);
+          .order('created_at', { ascending: false });
 
-        const likedPostIds = new Set(likes?.map(l => l.post_id) || []);
+        if (bookmarksError) throw bookmarksError;
 
-        const postsWithLikes = postsData.map(post => ({
+        if (bookmarksData && bookmarksData.length > 0) {
+          const bookmarkedPostIds = bookmarksData.map(b => b.post_id);
+          const { data, error } = await supabase
+            .from('posts')
+            .select(`
+              *,
+              author:profiles!posts_author_id_fkey(id, display_name, avatar_url)
+            `)
+            .in('id', bookmarkedPostIds);
+
+          if (error) throw error;
+          
+          // Sort posts to match bookmark order (most recently saved first)
+          const postMap = new Map((data as PostWithAuthor[] | null)?.map(p => [p.id, p]));
+          postsData = bookmarkedPostIds
+            .map(id => postMap.get(id))
+            .filter((p): p is PostWithAuthor => p !== undefined);
+        } else {
+          postsData = [];
+        }
+      } else {
+        let query = supabase
+          .from('posts')
+          .select(`
+            *,
+            author:profiles!posts_author_id_fkey(id, display_name, avatar_url)
+          `);
+
+        if (mode === 'public') {
+          query = query.eq('privacy_level', 'public');
+        } else if (mode === 'tagged' && user) {
+          query = query.eq('recipient_id', user.id);
+        } else if (mode === 'top') {
+          query = query
+            .eq('privacy_level', 'public')
+            .order('engagement_score', { ascending: false })
+            .limit(FEED_LIMITS.TOP_STORIES);
+        }
+
+        if (mode !== 'top') {
+          query = query.order('created_at', { ascending: false });
+        }
+
+        query = query.limit(FEED_LIMITS.DEFAULT);
+
+        const { data, error } = await query;
+        if (error) throw error;
+        postsData = data as PostWithAuthor[];
+      }
+
+      if (user && postsData && postsData.length > 0) {
+        const postIds = postsData.map(p => p.id);
+        
+        // Fetch likes and bookmarks in parallel
+        const [likesResult, bookmarksResult] = await Promise.all([
+          supabase
+            .from('post_likes')
+            .select('post_id')
+            .eq('user_id', user.id)
+            .in('post_id', postIds),
+          supabase
+            .from('bookmarks')
+            .select('post_id')
+            .eq('user_id', user.id)
+            .in('post_id', postIds)
+        ]);
+
+        const likedPostIds = new Set(likesResult.data?.map(l => l.post_id) || []);
+        const bookmarkedPostIds = new Set(bookmarksResult.data?.map(b => b.post_id) || []);
+
+        const postsWithStatus = postsData.map(post => ({
           ...post,
           is_liked: likedPostIds.has(post.id),
+          is_bookmarked: bookmarkedPostIds.has(post.id),
         }));
 
-        setPosts(postsWithLikes);
+        setPosts(postsWithStatus);
       } else {
         setPosts(postsData || []);
       }
@@ -110,16 +156,32 @@ export function Feed({ mode }: FeedProps) {
   }
 
   if (posts.length === 0) {
+    const getEmptyMessage = () => {
+      switch (mode) {
+        case 'tagged':
+          return {
+            title: 'No stories about you yet',
+            subtitle: 'When someone shares a story about you, it will appear here'
+          };
+        case 'saved':
+          return {
+            title: 'No saved posts yet',
+            subtitle: 'Bookmark posts to save them for later'
+          };
+        default:
+          return {
+            title: 'No stories to show',
+            subtitle: 'Be the first to share a positive story!'
+          };
+      }
+    };
+
+    const { title, subtitle } = getEmptyMessage();
+
     return (
       <div className="text-center py-12">
-        <p className="text-slate-500 mb-2">
-          {mode === 'tagged' ? 'No stories about you yet' : 'No stories to show'}
-        </p>
-        <p className="text-sm text-slate-400">
-          {mode === 'tagged'
-            ? 'When someone shares a story about you, it will appear here'
-            : 'Be the first to share a positive story!'}
-        </p>
+        <p className="text-slate-500 mb-2">{title}</p>
+        <p className="text-sm text-slate-400">{subtitle}</p>
       </div>
     );
   }
@@ -127,7 +189,12 @@ export function Feed({ mode }: FeedProps) {
   return (
     <div>
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} onLikeToggle={loadPosts} />
+        <PostCard 
+          key={post.id} 
+          post={post} 
+          onLikeToggle={loadPosts}
+          onBookmarkToggle={loadPosts}
+        />
       ))}
     </div>
   );

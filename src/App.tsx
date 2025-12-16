@@ -12,7 +12,7 @@ function AppContent() {
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [feedMode, setFeedMode] = useState<'public' | 'tagged' | 'top'>('public');
+  const [feedMode, setFeedMode] = useState<'public' | 'tagged' | 'top' | 'saved'>('public');
   const [refreshKey, setRefreshKey] = useState(0);
 
   const loadUnreadCount = useCallback(async () => {
@@ -96,6 +96,16 @@ function AppContent() {
                 }`}
               >
                 About You
+              </button>
+              <button
+                onClick={() => setFeedMode('saved')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  feedMode === 'saved'
+                    ? 'bg-emerald-600 text-white'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                Saved
               </button>
             </div>
           </div>
