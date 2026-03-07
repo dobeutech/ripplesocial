@@ -3,6 +3,7 @@ import { Modal } from '../ui/modal';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { useAuth } from '../../contexts/auth-context';
+import { AUTH_LIMITS } from '../../config/constants';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -27,12 +28,25 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
     setLoading(true);
 
     try {
+      if (email.length > AUTH_LIMITS.MAX_EMAIL_LENGTH) {
+        throw new Error(`Email must be ${AUTH_LIMITS.MAX_EMAIL_LENGTH} characters or fewer`);
+      }
+
       if (mode === 'login') {
         const { error } = await signIn(email, password);
         if (error) throw error;
       } else {
         if (!firstName.trim()) {
           throw new Error('First name is required');
+        }
+        if (firstName.trim().length > AUTH_LIMITS.MAX_NAME_LENGTH) {
+          throw new Error(`First name must be ${AUTH_LIMITS.MAX_NAME_LENGTH} characters or fewer`);
+        }
+        if (lastName.trim().length > AUTH_LIMITS.MAX_NAME_LENGTH) {
+          throw new Error(`Last name must be ${AUTH_LIMITS.MAX_NAME_LENGTH} characters or fewer`);
+        }
+        if (password.length < AUTH_LIMITS.MIN_PASSWORD_LENGTH) {
+          throw new Error(`Password must be at least ${AUTH_LIMITS.MIN_PASSWORD_LENGTH} characters`);
         }
         const { error } = await signUp(email, password, firstName, lastName);
         if (error) throw error;

@@ -6,7 +6,7 @@ import { Button } from '../ui/button';
 import { useAuth } from '../../contexts/auth-context';
 import { supabase } from '../../lib/supabase';
 import type { Database } from '../../lib/database.types';
-import { SEARCH_CONFIG } from '../../config/constants';
+import { SEARCH_CONFIG, POST_LIMITS } from '../../config/constants';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
@@ -70,8 +70,18 @@ export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostMo
       return;
     }
 
+    if (content.trim().length > POST_LIMITS.MAX_CONTENT_LENGTH) {
+      setError(`Story must be ${POST_LIMITS.MAX_CONTENT_LENGTH} characters or fewer`);
+      return;
+    }
+
     if (!recipientName.trim()) {
       setError('Please specify who this story is about');
+      return;
+    }
+
+    if (recipientName.trim().length > POST_LIMITS.MAX_RECIPIENT_NAME_LENGTH) {
+      setError(`Recipient name must be ${POST_LIMITS.MAX_RECIPIENT_NAME_LENGTH} characters or fewer`);
       return;
     }
 
@@ -208,14 +218,29 @@ export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostMo
           </p>
         </div>
 
-        <Textarea
-          label="Your Story"
-          placeholder="Share how this person made a positive impact..."
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          rows={6}
-          required
-        />
+        <div>
+          <Textarea
+            label="Your Story"
+            placeholder="Share how this person made a positive impact..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={6}
+            required
+            maxLength={POST_LIMITS.MAX_CONTENT_LENGTH}
+          />
+          <p
+            data-testid="text-character-count"
+            className={`mt-1 text-xs text-right ${
+              content.length > POST_LIMITS.MAX_CONTENT_LENGTH
+                ? 'text-red-500'
+                : content.length > POST_LIMITS.MAX_CONTENT_LENGTH * 0.9
+                  ? 'text-amber-500'
+                  : 'text-slate-400'
+            }`}
+          >
+            {content.length}/{POST_LIMITS.MAX_CONTENT_LENGTH}
+          </p>
+        </div>
 
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-2">

@@ -1,256 +1,174 @@
-# Ripple Social Platform
+# Ripple - Celebrate Positive Impact
 
-A positive impact social media platform built with React, TypeScript, and Supabase.
-
----
+A social media platform for sharing positive stories about how people impact others' lives. Built with React, TypeScript, and Supabase.
 
 ## Overview
 
-Ripple is a social media platform focused on sharing positive stories about how people impact others' lives. Users can create posts about meaningful interactions, tag recipients, and build a community centered on gratitude and positive impact.
+Ripple is a community-driven platform where users share stories about meaningful interactions with others. Whether it's a mentor who changed your career, a stranger who brightened your day, or a friend who was always there - Ripple lets you celebrate those moments and build a culture of gratitude.
 
-### Key Features
+## Features
 
-- ✅ **Authentication** - Sign up, sign in, session management
-- ✅ **Post Creation** - Share stories with privacy controls
-- ✅ **Feed System** - Public feed, top stories, tagged posts
-- ✅ **Engagement** - Like posts, comment, notifications
-- ✅ **Privacy Controls** - Public, private, recipient-only posts
-- ✅ **User Profiles** - Customizable profiles with avatars
-- ✅ **Notifications** - Real-time notifications for interactions
-
----
+- **Authentication** - Email/password sign up and sign in with secure session management via Supabase Auth
+- **Post Creation** - Share stories about positive impact with privacy controls (public, private, recipient-only)
+- **Feed System** - Browse public stories, top stories, tagged posts, and saved/bookmarked posts
+- **Engagement** - Like, comment on, and bookmark posts
+- **Recipient Tagging** - Tag the person who made an impact (registered users or anonymous matches)
+- **Notifications** - Real-time polling notifications for likes, comments, and tags
+- **User Profiles** - Customizable profiles with display names and avatars
+- **User Safety** - Block users and report content
 
 ## Tech Stack
 
-- **Frontend:** React 18 + TypeScript + Vite
-- **Styling:** Tailwind CSS
-- **Backend:** Supabase (PostgreSQL + Auth + Storage)
-- **Icons:** Lucide React
-- **Linting:** ESLint 9
-- **Deployment:** Vercel
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18, TypeScript, Vite |
+| Styling | Tailwind CSS |
+| Backend & Auth | Supabase (PostgreSQL + Auth + RLS) |
+| Icons | Lucide React |
+| Linting | ESLint 9 |
+| Formatting | Prettier |
+| Testing | Vitest, Testing Library |
+| Deployment | Replit |
 
----
-
-## Quick Start
+## Getting Started
 
 ### Prerequisites
 
 - Node.js 20+
-- npm or yarn
-- Supabase account
+- npm
+- A Supabase project ([create one free](https://supabase.com))
 
 ### Installation
 
 ```bash
-# Clone repository
-git clone https://github.com/dobeutech/ripplesocial.git
+git clone <repository-url>
 cd ripplesocial
 
-# Install dependencies
 npm install
-
-# Setup environment variables
-cp .env.example .env.local
-# Edit .env.local with your Supabase credentials
-
-# Start development server
-npm run dev
 ```
 
 ### Environment Variables
 
-Create `.env.local` with:
+Copy the example env file and fill in your Supabase credentials:
 
 ```bash
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
+cp .env.example .env.local
 ```
 
----
+Required variables:
 
-## Development
+| Variable | Description |
+|----------|-------------|
+| `VITE_SUPABASE_URL` | Your Supabase project URL (e.g. `https://abc123.supabase.co`) |
+| `VITE_SUPABASE_ANON_KEY` | Your Supabase anonymous/public API key |
+
+### Supabase Setup
+
+1. Create a new project at [supabase.com](https://supabase.com)
+2. Navigate to the SQL Editor in your Supabase dashboard
+3. Run the migration files in order from `supabase/migrations/`:
+   - `20251024025029_create_initial_schema.sql`
+   - `20251024083312_fix_security_and_triggers.sql`
+   - `20251215203830_add_bookmarks_table.sql`
+4. Optionally seed demo data by running `scripts/seed-demo-data.sql`
+5. Copy your project URL and anon key from Settings > API into your `.env.local`
+
+### Development
+
+```bash
+npm run dev
+```
+
+The app runs on port 5000 by default.
 
 ### Available Scripts
 
-```bash
-npm run dev        # Start dev server (port 5173)
-npm run build      # Build for production
-npm run preview    # Preview production build
-npm run typecheck  # Type check without building
-npm run lint       # Run ESLint
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |
+| `npm run typecheck` | Run TypeScript type checking |
+| `npm run lint` | Run ESLint |
+| `npm run format` | Format code with Prettier |
+| `npm run format:check` | Check formatting without modifying files |
+| `npm run test` | Run tests |
+| `npm run test:watch` | Run tests in watch mode |
+| `npm run test:coverage` | Run tests with coverage report |
+
+## Project Structure
+
+```
+src/
+  App.tsx                              Main app component with feed modes
+  main.tsx                             Entry point
+  index.css                            Global styles (Tailwind)
+  config/
+    constants.ts                       App constants (polling intervals, limits)
+  lib/
+    supabase.ts                        Supabase client initialization
+    database.types.ts                  Generated TypeScript types for DB tables
+  contexts/
+    auth-context.tsx                   Auth provider (sign up, sign in, sign out, profile)
+  components/
+    auth/auth-modal.tsx                Login/signup modal
+    layout/header.tsx                  App header with navigation
+    feed/feed.tsx                      Post feed (public, tagged, top, saved)
+    posts/post-card.tsx                Individual post card with like/bookmark
+    posts/create-post-modal.tsx        Create new story modal
+    notifications/notification-panel.tsx  Notification sidebar
+    ui/                                Reusable UI primitives (Button, Card, Input, Modal, Textarea)
+    ErrorBoundary.tsx                  Error boundary for graceful error handling
+supabase/
+  migrations/                          SQL migration files for database schema
+scripts/
+  seed-demo-data.sql                   Optional demo data for development
 ```
 
-### Project Structure
+## Database Schema
 
-```
-ripple/
-├── src/
-│   ├── components/     # React components
-│   │   ├── auth/      # Authentication UI
-│   │   ├── feed/      # Feed display
-│   │   ├── posts/     # Post creation/display
-│   │   └── ui/        # Reusable UI components
-│   ├── contexts/      # React contexts
-│   ├── lib/           # Utilities and Supabase client
-│   └── config/        # App configuration
-├── supabase/
-│   └── migrations/    # Database migrations
-└── scripts/           # Utility scripts
-```
+Key tables (all protected by Row Level Security):
 
----
-
-## Documentation
-
-- **[DOCUMENTATION_INDEX.md](./DOCUMENTATION_INDEX.md)** - Complete documentation guide
-- **[PROJECT_STATUS.md](./PROJECT_STATUS.md)** - Complete project status and roadmap
-- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System architecture and diagrams
-- **[ENVIRONMENT.md](./ENVIRONMENT.md)** - Development environment setup
-- **[AGENTS.md](./AGENTS.md)** - Guide for working with Ona Agent
-- **[RUNBOOK.md](./RUNBOOK.md)** - Operational runbook for on-call engineers
-- **[CLI_WORKFLOWS.md](./CLI_WORKFLOWS.md)** - Common CLI workflows
-- **[AUTOMATION_PLAN.md](./AUTOMATION_PLAN.md)** - CI/CD and automation roadmap
-- **[COST_REVIEW.md](./COST_REVIEW.md)** - Cost analysis and optimization
-- **[PRODUCTION_PLAN.md](./PRODUCTION_PLAN.md)** - Production readiness plan
-- **[OUTSTANDING_ITEMS.md](./OUTSTANDING_ITEMS.md)** - Production checklist
-- **[CODE_REVIEW.md](./CODE_REVIEW.md)** - Code review findings
-- **[IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md)** - Implementation notes
-
----
-
-## Database
-
-### Migrations
-
-Database migrations are located in `supabase/migrations/`. Apply them via:
-
-1. Supabase Dashboard > SQL Editor
-2. Copy migration content and execute
-3. Regenerate TypeScript types:
-
-```bash
-npx supabase gen types typescript --project-id YOUR_PROJECT_ID > src/lib/database.types.ts
-```
-
-### Schema
-
-Key tables:
-- `profiles` - User profiles
-- `posts` - User posts/stories
-- `post_likes` - Post engagement
-- `comments` - Post comments
-- `notifications` - User notifications
-- `pending_recipient_matches` - Anonymous recipient matching
-- `verification_requests` - ID verification
-- `user_blocks` - User blocking
-
----
+| Table | Purpose |
+|-------|---------|
+| `profiles` | User profiles (extends Supabase `auth.users`) |
+| `posts` | Stories about positive impact |
+| `post_likes` | Like tracking |
+| `bookmarks` | Saved/bookmarked posts |
+| `comments` | Post comments |
+| `notifications` | User notifications |
+| `pending_recipient_matches` | Anonymous recipient matching |
+| `verification_requests` | Identity verification |
+| `user_blocks` | User blocking |
 
 ## Deployment
 
-### Vercel (Recommended)
+### Replit
 
-```bash
-# Install Vercel CLI
-npm i -g vercel
+The app is configured for deployment on Replit. The `npm run build` command produces a static `dist/` directory that is served in production.
 
-# Deploy to preview
-vercel
+### Other Platforms
 
-# Deploy to production
-vercel --prod
-```
+Since the app is a static SPA, it can be deployed to any static hosting provider:
 
-### Environment Variables in Vercel
-
-Add these in Vercel Dashboard > Settings > Environment Variables:
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
-
----
-
-## Contributing
-
-### Workflow
-
-1. Create feature branch: `git checkout -b feature/your-feature`
-2. Make changes and test locally
-3. Run checks: `npm run typecheck && npm run lint`
-4. Commit with descriptive message
-5. Push and create pull request
-
-### Commit Message Format
-
-```
-<type>: <description>
-
-<body>
-
-Co-authored-by: Ona <no-reply@ona.com>
-```
-
-Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`
-
----
-
-## Production Status
-
-**Current Status:** Development/Staging  
-**Production Readiness:** 60-70%
-
-### Production Blockers
-
-- ❌ No automated tests
-- ❌ No CI/CD pipeline
-- ❌ No error monitoring
-- ❌ No performance monitoring
-
-See [PRODUCTION_PLAN.md](./PRODUCTION_PLAN.md) for detailed roadmap.
-
----
+1. Run `npm run build`
+2. Deploy the `dist/` directory
+3. Set environment variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) as build-time variables
 
 ## Security
 
-### Reporting Security Issues
+- All database tables use Row Level Security (RLS)
+- Authentication handled by Supabase Auth (JWT-based)
+- Input sanitization on all user-facing forms
+- No secrets stored in client code
+- See [SECURITY.md](./SECURITY.md) for vulnerability reporting
 
-Please report security vulnerabilities to: security@dobeutech.com
+## Contributing
 
-### Security Features
-
-- ✅ Row Level Security (RLS) on all tables
-- ✅ Input sanitization for SQL injection prevention
-- ✅ JWT-based authentication
-- ✅ Secure session management
-- ✅ HTTPS only
-
----
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
 ## License
 
-[Add your license here]
+This project is licensed under the MIT License. See [LICENSE](./LICENSE) for details.
 
----
-
-## Support
-
-- **Issues:** [GitHub Issues](https://github.com/dobeutech/ripplesocial/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/dobeutech/ripplesocial/discussions)
-- **Email:** support@dobeutech.com
-
----
-
-## Acknowledgments
-
-Built with:
-- [React](https://react.dev)
-- [TypeScript](https://www.typescriptlang.org)
-- [Vite](https://vitejs.dev)
-- [Supabase](https://supabase.com)
-- [Tailwind CSS](https://tailwindcss.com)
-- [Lucide Icons](https://lucide.dev)
-
----
-
-**Last Updated:** 2024-12-14  
-**Version:** 0.1.0  
-**Status:** Development
+Copyright (c) 2026 Dobeu Tech Solutions

@@ -9,6 +9,17 @@ export default defineConfig({
     allowedHosts: true,
     strictPort: true,
   },
+  build: {
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          supabase: ['@supabase/supabase-js'],
+        },
+      },
+    },
+  },
   optimizeDeps: {
     exclude: ['lucide-react'],
   },

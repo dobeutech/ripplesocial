@@ -21,3 +21,9 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Replit
+.replit
+.cache/
+.local/
+.upm/
